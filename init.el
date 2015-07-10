@@ -24,7 +24,8 @@
 		     column-marker
 		     relative-line-numbers
 		     rainbow-delimiters
-			 color-theme-approximate))
+		     color-theme-approximate
+		     nyan-mode))
 
 (setq package-archives '(("marmalade" . "https://marmalade-repo.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")))
@@ -84,6 +85,11 @@
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode t)
+
+(require 'nyan-mode)
+(defconst +catface+ [["~:3" "~;3"] ["~^ω^" "~^ω^"]])
+(setq nyan-wavy-trail t)
+(nyan-start-animation)
 
 (require 'powerline)
 (powerline-center-evil-theme)
