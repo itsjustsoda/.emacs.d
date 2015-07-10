@@ -33,7 +33,7 @@
 (package-initialize)
 
 (unless package-archive-contents
-  (package-refresh-components))
+  (package-refresh-contents))
 
 (dolist (package package-list)
   (unless (package-installed-p package)
