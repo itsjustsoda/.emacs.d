@@ -1,17 +1,20 @@
-;; Editor
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
 
 (menu-bar-mode -1)
-(tool-bar-mode -1)
-
-(load-theme 'wombat t)
+(tool-bar-mode 0)
 
 ;; Backups
 (setq backup-directory-alist
 	  `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms
 	  `((".*" ,temporary-file-directory t)))
+
+;; After here, things have chance of failing.
+(load-theme 'wombat t)
+
+(set-default-font "DejaVu Sans Mono 10")
+(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono 10"))
 
 ;; Packaging
 (setq package-list '(evil
@@ -25,7 +28,9 @@
 		     relative-line-numbers
 		     rainbow-delimiters
 		     color-theme-approximate
-		     nyan-mode))
+		     nyan-mode
+		     elixir-mode
+		     color-theme))
 
 (setq package-archives '(("marmalade" . "https://marmalade-repo.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")))
@@ -47,7 +52,7 @@
   (require 'el-get))
 
 (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-(el-get 'sync)
+;; (el-get 'sync)
 
 
 ;; el-get Recipies
@@ -60,6 +65,8 @@
 (evil-leader/set-leader "\\" )
 (setq evil-leader/in-all-states 1)
 (global-evil-leader-mode)
+
+; (setq x-select-enable-clipboard nil)
 
 (require 'evil)
 (evil-mode 1)
@@ -86,6 +93,8 @@
 (setq ido-everywhere t)
 (ido-mode t)
 
+(setq vc-follow-symlinks t)
+
 (require 'nyan-mode)
 (defconst +catface+ [["~:3" "~;3"] ["~^ω^" "~^ω^"]])
 (setq nyan-wavy-trail t)
@@ -104,10 +113,9 @@
 (git-gutter-fr+-minimal)
 
 ;; Theming
+(load-theme 'wombat t)
 
 ;; Parens
-(set-default-font "DejaVu Sans Mono 10")
-
 (require 'paren)
 (set-face-foreground 'show-paren-match "yellow")
 (set-face-background 'show-paren-match nil)
