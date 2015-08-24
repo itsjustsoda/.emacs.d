@@ -22,6 +22,7 @@
 		     evil-numbers
 		     evil-leader
 		     evil-visualstar
+		     neotree
 		     magit
 		     git-gutter-fringe+
 		     column-marker
@@ -30,11 +31,19 @@
 		     color-theme-approximate
 		     nyan-mode
 		     elixir-mode
-		     color-theme))
+		     color-theme
+		     powerline
+		     linum-relative
+		     smex
+		     haskell-mode
+		     alchemist
+		     company
+		     ))
 
 (setq package-archives '(("marmalade" . "https://marmalade-repo.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")))
 
+(setq evil-want-C-u-scroll t)
 (package-initialize)
 
 (unless package-archive-contents
@@ -56,14 +65,17 @@
 
 
 ;; el-get Recipies
-(el-get-bundle powerline
-  :url "https://github.com/Dewdrops/powerline.git"
-  :features powerline)
+; (el-get-bundle powerline
+;  :url "https://github.com/Dewdrops/powerline.git"
+;  :features powerline)
 
 ;; Evil >:D
 (require 'evil-leader)
 (evil-leader/set-leader "\\" )
 (setq evil-leader/in-all-states 1)
+(evil-leader/set-key
+  "x" 'smex
+  "TAB" 'neotree-toggle)
 (global-evil-leader-mode)
 
 ; (setq x-select-enable-clipboard nil)
@@ -76,6 +88,13 @@
 
 (require 'evil-surround)
 (global-evil-surround-mode 1)
+
+(defun minibuffer-keyboard-quit ()
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark  t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
 
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
 (define-key evil-visual-state-map [escape] 'keyboard-quit)
