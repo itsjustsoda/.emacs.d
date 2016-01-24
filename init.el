@@ -1,159 +1,182 @@
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
+;;; package --- Summary :
+;;; Commentary:
+
+;;; Code:
+
+;; Just Editor Things
+(setq inhibit-startup-screen t)
 
 (menu-bar-mode -1)
-(tool-bar-mode 0)
+(when window-system 
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1))
 
-;; Backups
 (setq backup-directory-alist
-	  `((".*" . ,temporary-file-directory)))
+      `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms
-	  `((".*" ,temporary-file-directory t)))
+      `((".*" ,temporary-file-directory t)))
 
-;; After here, things have chance of failing.
+(xterm-mouse-mode t)
+(setq mouse-sel-mode t)
+
+
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file 'noerror)
+
+;; Default Formatting Options
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+
+
 (load-theme 'wombat t)
 
-(set-default-font "DejaVu Sans Mono 10")
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono 10"))
+(defmacro load-font (font)
+  (when (and window-system (find-font (font-spec :name font))
+	     (set-frame-font font nil t))))
+
+(load-font "DejaVu Sans Mono 8")
 
 ;; Packaging
-(setq package-list '(evil
-		     evil-surround
-		     evil-numbers
-		     evil-leader
-		     evil-visualstar
-		     neotree
-		     magit
-		     git-gutter-fringe+
-		     column-marker
-		     relative-line-numbers
-		     rainbow-delimiters
-		     color-theme-approximate
-		     nyan-mode
-		     elixir-mode
-		     color-theme
-		     powerline
-		     linum-relative
-		     smex
-		     haskell-mode
-		     alchemist
-		     company
-		     ))
-
 (setq package-archives '(("marmalade" . "https://marmalade-repo.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")))
 
-(setq evil-want-C-u-scroll t)
 (package-initialize)
 
 (unless package-archive-contents
   (package-refresh-contents))
 
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 
-;; El-get
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+(eval-when-compile
+  (require 'use-package))
 
-(unless (require 'el-get nil 'noerror)
-  (package-install 'el-get)
-  (require 'el-get))
+(setq use-package-always-ensure t)
 
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-;; (el-get 'sync)
+;; Load language options
+(add-to-list 'load-path "~/.emacs.d/lang/")
+(mapc 'load-library
+	  (mapcar 'file-name-base 
+		(file-expand-wildcards 
+		  (concat user-emacs-directory "/lang/*"))))
+
+(use-package neotree
+  :config
+  (customize-set-variable 'abbrev-mode t)
+  (add-hook 'neotree-mode-hook
+	    (lambda ()
+	      (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
+	      (define-key evil-normal-state-local-map (kbd "SPC") 'neotree-enter)
+	      (define-key evil-normal-state-local-map (kbd "r") 'neotree-refresh)
+	      (define-key evil-normal-state-local-map (kbd "q") 'neotree-hide)
+	      (define-key evil-normal-state-local-map (kbd "I") 'neotree-hidden-file-toggle)
+	      (define-key evil-normal-state-local-map (kbd "i") 'neotree-enter-horizontal-split)
+	      (define-key evil-normal-state-local-map (kbd "s") 'neotree-enter-vertical-split)
+	      (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter))))
+
+(use-package nyan-mode
+  :init
+  (setq nyan-wavy-trail t)
+  (nyan-mode)
+  (nyan-start-animation)
+  :config
+  (defconst +catface+ [["~:3" "~;3"] ["~^ω^" "~^.^"]]))
+
+(use-package evil-leader
+  :init
+  (setq evil-want-C-u-scroll t)
+  :config
+  (evil-leader/set-leader "\\")
+  (setq evil-leader/in-all-states 1)
+  (evil-leader/set-key
+    "x"   'smex
+    "r"   'rainbow-delimiters-mode
+    "ll"  'compile
+    "n"   'linum-relative-toggle
+    "TAB" 'neotree-toggle))
+
+(use-package evil
+  :init 
+  (setq evil-want-C-u-scroll t)
+  (global-evil-leader-mode)
+  :config
+  (evil-mode))
 
 
-;; el-get Recipies
-; (el-get-bundle powerline
-;  :url "https://github.com/Dewdrops/powerline.git"
-;  :features powerline)
+(use-package ido
+  :config
+  (ido-mode t))
 
-;; Evil >:D
-(require 'evil-leader)
-(evil-leader/set-leader "\\" )
-(setq evil-leader/in-all-states 1)
-(evil-leader/set-key
-  "x" 'smex
-  "TAB" 'neotree-toggle)
-(global-evil-leader-mode)
+(use-package smex)
 
-; (setq x-select-enable-clipboard nil)
-
-(require 'evil)
-(evil-mode 1)
-
-(require 'evil-visualstar)
-(global-evil-visualstar-mode)
-
-(require 'evil-surround)
-(global-evil-surround-mode 1)
-
-(defun minibuffer-keyboard-quit ()
-  (interactive)
-  (if (and delete-selection-mode transient-mark-mode mark-active)
-      (setq deactivate-mark  t)
-    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
-    (abort-recursive-edit)))
-
-(define-key evil-normal-state-map [escape] 'keyboard-quit)
-(define-key evil-visual-state-map [escape] 'keyboard-quit)
-(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(use-package projectile
+  :config
+  (projectile-global-mode))
 
 
-;; Editor
-(require 'magit)
-(require 'ido)
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(ido-mode t)
+(use-package linum-relative
+  :config
+  (global-linum-mode 1))
 
-(setq vc-follow-symlinks t)
+(use-package rainbow-delimiters)
 
-(require 'nyan-mode)
-(defconst +catface+ [["~:3" "~;3"] ["~^ω^" "~^ω^"]])
-(setq nyan-wavy-trail t)
-(nyan-start-animation)
 
-(require 'powerline)
-(powerline-center-evil-theme)
-
-(setq relative-line-numbers-mode t)
-(setq column-number-mode t)
-(setq line-number-mode t)
-
-(setq default-truncate-lines t)
-
-(require 'git-gutter-fringe+)
-(git-gutter-fr+-minimal)
-
-;; Theming
-(load-theme 'wombat t)
-
-;; Parens
-(require 'paren)
-(set-face-foreground 'show-paren-match "yellow")
-(set-face-background 'show-paren-match nil)
-
-(setq show-paren-delay 0)
 (show-paren-mode 1)
+(setq show-parent-delay 0)
 
-(require 'linum-relative)
-(global-linum-mode 1)
-(setq linum-format "%4d\u2502")
+(use-package fill-column-indicator
+  :config
+  (setq fci-rule-column 80)
+  (setq fci-dash-pattern 0.5))
 
-(global-hl-line-mode t)
-(set-face-foreground 'highlight nil)
-(set-face-background 'hl-line "gray10")
-(set-face-underline 'hl-line nil)
+(use-package flycheck
+  :init
+  (use-package let-alist)
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
 
-(color-theme-approximate-on)
 
-(require 'column-marker)
-(column-marker-1 80)
+(use-package irony
+  :init
+  (add-hook 'c++-mode-hook 'irony-mode)
+  (add-hook 'c-mode-hook 'irony-mode)
+  (defun my-irony-mode-hook ()
+    (define-key irony-mode-map [remap completion-at-point]
+      'irony-completion-at-point-async)
+    (define-key irony-mode-map [remap complete-symbol]
+      'irony-completion-at-point-async))
+  (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
 
-(require 'rainbow-delimiters)
+(use-package irony-eldoc
+  :config
+  (add-hook 'irony-mode-hook 'irony-eldoc))
+
+(use-package company
+  :config
+  (add-hook 'after-init-hook 'global-company-mode))
+
+(use-package company-irony
+  :config
+  (add-to-list 'company-backends 'company-irony))
+
+(use-package flycheck-irony
+  :config
+  (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+
+
+(use-package auto-complete
+  :config
+  (ac-config-default))
+
+(use-package sr-speedbar;
+  :config
+  (setq speedbar-use-images nil))
+
+(use-package qml-mode)
+
+(use-package ess)
+
+(use-package racket-mode
+  :config
+  (defconst racket--repl-command-timeout 2))
