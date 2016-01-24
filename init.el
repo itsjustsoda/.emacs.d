@@ -37,7 +37,8 @@
 (load-font "DejaVu Sans Mono 8")
 
 ;; Packaging
-(setq package-archives '(("marmalade" . "https://marmalade-repo.org/packages/")
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+			 ("marmalade" . "https://marmalade-repo.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")))
 
 (package-initialize)
