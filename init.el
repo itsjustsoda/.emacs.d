@@ -17,7 +17,7 @@
       `((".*" ,temporary-file-directory t)))
 
 (xterm-mouse-mode t)
-(setq mouse-sel-mode t)
+(customize-set-variable 'mouse-sel-mode t)
 
 
 (setq custom-file "~/.emacs.d/custom.el")
@@ -29,6 +29,7 @@
 
 
 (load-theme 'wombat t)
+;(load-theme 'gruvbox  t)
 
 (defmacro load-font (font)
   (when (and window-system (find-font (font-spec :name font))
@@ -73,6 +74,7 @@
 	      (define-key evil-normal-state-local-map (kbd "I") 'neotree-hidden-file-toggle)
 	      (define-key evil-normal-state-local-map (kbd "i") 'neotree-enter-horizontal-split)
 	      (define-key evil-normal-state-local-map (kbd "s") 'neotree-enter-vertical-split)
+	      (define-key evil-normal-state-local-map (kbd "o") 'neotree-create-node)
 	      (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter))))
 
 (use-package nyan-mode
@@ -102,6 +104,10 @@
   (global-evil-leader-mode)
   :config
   (evil-mode))
+
+(use-package evil-surround
+  :init
+  (global-evil-surround-mode 1))
 
 
 (use-package ido
@@ -178,6 +184,9 @@
 
 (use-package ess)
 
-(use-package racket-mode
-  :config
-  (defconst racket--repl-command-timeout 2))
+
+(use-package gruvbox-theme)
+
+(use-package smooth-scrolling)
+
+(use-package magit)
