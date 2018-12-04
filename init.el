@@ -55,6 +55,12 @@
 
 (setq use-package-always-ensure t)
 
+
+;; CEDET
+(load-file "/usr/share/emacs/site-lisp/cedet/cedet-devel-load.el")
+(semantic-load-enable-code-helpers)
+
+
 ;; Load language options
 (add-to-list 'load-path "~/.emacs.d/lang/")
 (mapc 'load-library
@@ -64,6 +70,7 @@
 
 (use-package neotree
   :config
+  (setq neo-smart-open t)
   (customize-set-variable 'abbrev-mode t)
   (add-hook 'neotree-mode-hook
 	    (lambda ()
@@ -92,17 +99,23 @@
   (evil-leader/set-leader "\\")
   (setq evil-leader/in-all-states 1)
   (evil-leader/set-key
-    "x"   'smex
+    "x"   'helm-M-x
+    "sx"  'smex
     "r"   'rainbow-delimiters-mode
     "ll"  'compile
     "n"   'linum-relative-toggle
-    "TAB" 'neotree-toggle))
+    "TAB" 'neotree-toggle
+    "g"   'magit-status))
 
 (use-package evil
   :init 
   (setq evil-want-C-u-scroll t)
   (global-evil-leader-mode)
   :config
+  (define-key evil-normal-state-map "gh"'windmove-left)
+  (define-key evil-normal-state-map "gj"'windmove-up)
+  (define-key evil-normal-state-map "gk"'windmove-down)
+  (define-key evil-normal-state-map "gl"'windmove-right)
   (evil-mode))
 
 (use-package evil-surround
@@ -110,15 +123,26 @@
   (global-evil-surround-mode 1))
 
 
-(use-package ido
-  :config
-  (ido-mode t))
+;; (use-package ido
+;;   :config
+;;   (ido-mode t))
 
 (use-package smex)
 
+
 (use-package projectile
   :config
+  (setq projectile-switch-open-project 'neotree-projectile-action)
   (projectile-global-mode))
+
+(use-package helm
+  :config
+  (require 'helm-config)
+  (setq helm-M-x-fuzzy-match t)
+  (use-package helm-projectile
+    :config
+    (setq projectile-completion-system 'helm)
+    (helm-projectile-on)))
 
 
 (use-package linum-relative
@@ -161,11 +185,13 @@
 
 (use-package company
   :config
-  (add-hook 'after-init-hook 'global-company-mode))
+  (add-hook 'after-init-hook 'global-company-mode)
+  :bind ("C-x C-o" . company-complete))
 
 (use-package company-irony
   :config
-  (add-to-list 'company-backends 'company-irony))
+  (add-to-list 'company-backends 'company-irony)
+  (add-to-list 'company-backends 'company-omnisharp))
 
 (use-package flycheck-irony
   :config
@@ -185,8 +211,18 @@
 (use-package ess)
 
 
-(use-package gruvbox-theme)
+(use-package gruvbox-theme
+  :config
+  (load-theme 'gruvbox))
 
 (use-package smooth-scrolling)
 
-(use-package magit)
+(use-package magit
+  :config
+  (use-package evil-magit))
+
+(use-package diff-hl)
+
+(use-package git-gutter)
+
+(use-package paredit)
